@@ -1,0 +1,19 @@
+{
+  "name": "ai-interview-analyzer-ui",
+  "version": "1.0.0",
+  "description": "AI Interview Analyzer Web UI (AgentVerse)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.3.5"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "lucide": "^1.64.0",
+    "marked": "^18.1.2"
+  }
+}

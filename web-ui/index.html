@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentVerse | AI Interview Analyzer & Recruiter Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navbar -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-logo">🤖</div>
+        <div class="brand-info">
+          <h1>AgentVerse <span class="badge badge-accent">AI Interviewer</span></h1>
+          <p>Real-time Behavioral, Technical & Multi-Agent Simulator</p>
+        </div>
+      </div>
+
+      <!-- Mode Selector Tabs -->
+      <nav class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" data-tab="interview">
+          <span class="icon">🎙️</span> Technical / HR
+        </button>
+        <button class="nav-tab" data-tab="training">
+          <span class="icon">🛠️</span> Training Sandbox
+        </button>
+        <button class="nav-tab" data-tab="gd">
+          <span class="icon">🗣️</span> Multi-Agent GD
+        </button>
+        <button class="nav-tab" data-tab="recruiter">
+          <span class="icon">👔</span> Recruiter Pipeline
+        </button>
+        <button class="nav-tab" data-tab="planner">
+          <span class="icon">📅</span> Planner Coach
+        </button>
+      </nav>
+
+      <!-- System Status Indicators -->
+      <div class="system-status">
+        <div class="status-pill" id="wsStatus">
+          <span class="dot dot-disconnected"></span> WebSocket
+        </div>
+        <div class="status-pill" id="camStatus">
+          <span class="dot dot-inactive"></span> Camera
+        </div>
+        <div class="status-pill" id="micStatus">
+          <span class="dot dot-inactive"></span> Mic
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Content -->
+    <main class="main-content">
+
+      <!-- TAB 1 & 2: INTERVIEW & TRAINING MODE -->
+      <div class="tab-pane active" id="pane-interview">
+        <div class="grid-layout">
+          <!-- Left Column: Camera Feed & Real-time Vision Tracking -->
+          <section class="card vision-card">
+            <div class="card-header">
+              <h2>📹 Live Vision Telemetry</h2>
+              <div class="header-actions">
+                <span class="status-badge" id="postureBadge">Good Posture</span>
+                <span class="status-badge" id="smileBadge">Neutral</span>
+              </div>
+            </div>
+
+            <div class="video-wrapper">
+              <video id="webcam" autoplay playsinline muted></video>
+              <canvas id="captureCanvas" style="display:none;"></canvas>
+              
+              <!-- Video Overlay HUD -->
+              <div class="video-hud">
+                <div class="hud-metric">
+                  <span class="label">Eye Contact</span>
+                  <div class="hud-progress">
+                    <div class="hud-progress-fill" id="hudEyeFill" style="width: 0%;"></div>
+                  </div>
+                  <span class="hud-val" id="hudEyeVal">0%</span>
+                </div>
+                <div class="hud-metric">
+                  <span class="label">Smile</span>
+                  <span class="hud-val" id="hudSmileVal">No</span>
+                </div>
+                <div class="hud-metric">
+                  <span class="label">Head Pose</span>
+                  <span class="hud-val" id="hudPoseVal">Straight</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vision Stats Grid -->
+            <div class="metrics-grid">
+              <div class="metric-box">
+                <span class="box-label">Eye Contact Score</span>
+                <span class="box-value text-cyan" id="metricEye">0%</span>
+              </div>
+              <div class="metric-box">
+                <span class="box-label">Posture Status</span>
+                <span class="box-value text-emerald" id="metricPosture">Good</span>
+              </div>
+              <div class="metric-box">
+                <span class="box-label">Smile Intensity</span>
+                <span class="box-value text-amber" id="metricSmile">0.0</span>
+              </div>
+              <div class="metric-box">
+                <span class="box-label">Confidence Rating</span>
+                <span class="box-value text-purple" id="metricConfidenceRating">--</span>
+              </div>
+            </div>
+
+            <!-- Proactive Coaching Banner -->
+            <div class="coaching-alert" id="coachingAlert" style="display: none;">
+              <span class="alert-icon">💡</span>
+              <span class="alert-text" id="coachingText">Try to sit up straight and look at the camera.</span>
+            </div>
+          </section>
+
+          <!-- Middle / Right Column: Interview Session & Voice Telemetry -->
+          <section class="card session-card">
+            <div class="card-header">
+              <h2>💬 Interview Session</h2>
+              <div class="interview-modes">
+                <button class="btn btn-sm btn-ghost active" id="btnModeTech">Technical</button>
+                <button class="btn btn-sm btn-ghost" id="btnModeHR">HR / Behavioral</button>
+                <button class="btn btn-sm btn-ghost" id="btnModeResume">Resume Dynamic</button>
+              </div>
+            </div>
+
+            <!-- Resume Upload (Optional Dynamic Mode) -->
+            <div class="resume-bar" id="resumeBar">
+              <span class="resume-label">📄 Resume PDF:</span>
+              <input type="file" id="resumeInput" accept=".pdf" style="display:none;">
+              <button class="btn btn-sm btn-outline" id="btnUploadResume">Upload PDF Resume</button>
+              <span class="resume-filename" id="resumeFileName">No resume uploaded</span>
+            </div>
+
+            <!-- Current Question Box -->
+            <div class="question-container">
+              <span class="question-tag">CURRENT QUESTION</span>
+              <h3 class="question-text" id="currentQuestionText">Connecting to Interview Server...</h3>
+            </div>
+
+            <!-- AI Spoken Reply / Feedback -->
+            <div class="ai-reply-container">
+              <div class="ai-speaker-badge">
+                <span class="pulse-ring"></span>
+                <span>AI Interviewer</span>
+                <button class="tts-toggle" id="ttsToggle" title="Toggle Spoken Audio">🔊 TTS ON</button>
+              </div>
+              <p class="ai-reply-text" id="aiReplyText">Awaiting your response...</p>
+            </div>
+
+            <!-- Live Speech & Audio Telemetry -->
+            <div class="audio-metrics-panel">
+              <div class="audio-stat">
+                <span class="stat-label">Words Per Min (WPM)</span>
+                <span class="stat-value" id="statWpm">0</span>
+              </div>
+              <div class="audio-stat">
+                <span class="stat-label">Filler Words</span>
+                <span class="stat-value text-amber" id="statFillers">0</span>
+              </div>
+              <div class="audio-stat">
+                <span class="stat-label">Pauses</span>
+                <span class="stat-value" id="statPauses">0</span>
+              </div>
+              <div class="audio-stat">
+                <span class="stat-label">Confidence Score</span>
+                <span class="stat-value text-emerald" id="statConfidenceScore">0%</span>
+              </div>
+            </div>
+
+            <!-- Live Transcript Stream -->
+            <div class="transcript-box">
+              <span class="transcript-label">🗣️ LIVE SPEECH RECOGNITION (Whisper):</span>
+              <p class="transcript-content" id="transcriptText">Speak into your microphone...</p>
+            </div>
+
+            <!-- Interaction Controls -->
+            <div class="controls-toolbar">
+              <button class="btn btn-primary" id="btnRecord">
+                <span class="mic-icon">🔴</span> <span id="recordBtnText">Record Answer</span>
+              </button>
+              <button class="btn btn-secondary" id="btnNextQuestion">
+                Next Question ➔
+              </button>
+              <button class="btn btn-danger" id="btnEndSession">
+                End & Get Report
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- TAB 3: MULTI-AGENT GROUP DISCUSSION (GD) -->
+      <div class="tab-pane" id="pane-gd">
+        <div class="gd-stage-card card">
+          <div class="card-header">
+            <div>
+              <h2>👥 Multi-Agent Group Discussion Arena</h2>
+              <p class="card-desc">Simulated competitive debate with 3 distinct AI personas and Judge AI</p>
+            </div>
+            <div class="gd-topic-banner" id="gdTopicBanner">
+              Topic: <em>Not Started</em>
+            </div>
+          </div>
+
+          <!-- The Debate Circle / Avatars -->
+          <div class="debate-arena">
+            <div class="avatar-card judge-card" id="speakerJudge">
+              <div class="avatar-circle">⚖️</div>
+              <div class="avatar-meta">
+                <h4>Judge AI</h4>
+                <p>Moderator & Evaluator</p>
+              </div>
+              <span class="speaking-indicator">SPEAKING</span>
+            </div>
+
+            <div class="competitors-row">
+              <div class="avatar-card" id="speakerAlex">
+                <div class="avatar-circle">⚡</div>
+                <div class="avatar-meta">
+                  <h4>AI Alex</h4>
+                  <p>Aggressive Counter-arguer</p>
+                </div>
+                <span class="speaking-indicator">SPEAKING</span>
+              </div>
+
+              <div class="avatar-card user-card" id="speakerUser">
+                <div class="avatar-circle">👤</div>
+                <div class="avatar-meta">
+                  <h4>You (Candidate)</h4>
+                  <p>Participant</p>
+                </div>
+                <span class="speaking-indicator">SPEAKING</span>
+              </div>
+
+              <div class="avatar-card" id="speakerJordan">
+                <div class="avatar-circle">⚙️</div>
+                <div class="avatar-meta">
+                  <h4>AI Jordan</h4>
+                  <p>Edge-case Technical Specialist</p>
+                </div>
+                <span class="speaking-indicator">SPEAKING</span>
+              </div>
+
+              <div class="avatar-card" id="speakerTaylor">
+                <div class="avatar-circle">💡</div>
+                <div class="avatar-meta">
+                  <h4>AI Taylor</h4>
+                  <p>Pragmatic Realist</p>
+                </div>
+                <span class="speaking-indicator">SPEAKING</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Debate Transcript Feed -->
+          <div class="debate-feed" id="gdTranscriptFeed">
+            <div class="debate-msg system">Click "Start Group Discussion" to generate a debate topic and begin.</div>
+          </div>
+
+          <!-- GD Controls -->
+          <div class="gd-controls-bar">
+            <button class="btn btn-primary" id="btnStartGD">🚀 Start Group Discussion</button>
+            <button class="btn btn-secondary" id="btnRecordGDTurn" disabled>
+              🎙️ Speak Argument (Turn)
+            </button>
+            <button class="btn btn-danger" id="btnEndGD" disabled>🏁 Conclude & Judge Verdict</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: RECRUITER PIPELINE -->
+      <div class="tab-pane" id="pane-recruiter">
+        <div class="pipeline-card card">
+          <div class="card-header">
+            <div>
+              <h2>👔 The Recruiter Pipeline</h2>
+              <p class="card-desc">Comprehensive Multi-Agent Candidate Evaluation (Technical + HR + GD + Resume Matching)</p>
+            </div>
+          </div>
+
+          <div class="pipeline-inputs-grid">
+            <div class="input-group">
+              <label for="pipelineJD">📌 Job Description (JD):</label>
+              <textarea id="pipelineJD" rows="5" placeholder="Paste the Job Description here (e.g. Senior Full-Stack Engineer, FastAPI, React, Distributed Systems)..."></textarea>
+            </div>
+
+            <div class="input-group">
+              <label for="pipelineResume">📄 Candidate Resume Text (or upload PDF):</label>
+              <textarea id="pipelineResume" rows="5" placeholder="Extracted resume text, skills, past experience, education..."></textarea>
+            </div>
+          </div>
+
+          <!-- Pipeline Stage Scores -->
+          <div class="stage-scores-row">
+            <div class="score-input-card">
+              <span class="score-stage-title">💻 Technical Score</span>
+              <input type="number" id="inputTechScore" min="0" max="100" value="85">
+              <span class="score-unit">/ 100</span>
+            </div>
+            <div class="score-input-card">
+              <span class="score-stage-title">🤝 Behavioral / HR</span>
+              <input type="number" id="inputHRScore" min="0" max="100" value="88">
+              <span class="score-unit">/ 100</span>
+            </div>
+            <div class="score-input-card">
+              <span class="score-stage-title">🗣️ Group Discussion</span>
+              <input type="number" id="inputGDScore" min="0" max="100" value="80">
+              <span class="score-unit">/ 100</span>
+            </div>
+          </div>
+
+          <div class="pipeline-actions">
+            <button class="btn btn-primary btn-lg" id="btnRunRecruiter">
+              🔍 Run Recruiter Agent Verdict
+            </button>
+          </div>
+
+          <!-- Recruiter Verdict Output -->
+          <div class="verdict-container card" id="verdictContainer" style="display:none;">
+            <div class="verdict-header">
+              <h3>🏆 Recruiter Evaluation Report</h3>
+              <button class="btn btn-sm btn-outline" id="btnTransferToPlanner">Send to Planner Coach ➔</button>
+            </div>
+            <div class="markdown-body" id="verdictMarkdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: PLANNER COACH -->
+      <div class="tab-pane" id="pane-planner">
+        <div class="planner-card card">
+          <div class="card-header">
+            <div>
+              <h2>📅 Planner Agent: Soft-Skills Coach</h2>
+              <p class="card-desc">Generates a customized, week-by-week communication & interview recovery roadmap</p>
+            </div>
+          </div>
+
+          <div class="planner-inputs">
+            <div class="input-group">
+              <label>Target Role / Job Context:</label>
+              <input type="text" id="plannerRoleInput" placeholder="e.g. Lead Software Engineer" value="Software Engineer">
+            </div>
+            <div class="input-group">
+              <label>Recruiter Verdict Summary / Feedback:</label>
+              <textarea id="plannerVerdictInput" rows="4" placeholder="Paste recruiter verdict or weak points (communication, confidence, argumentation)..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="btnGenerateRoadmap">
+              ✨ Generate Personalized Roadmap
+            </button>
+          </div>
+
+          <!-- Roadmap Display -->
+          <div class="roadmap-container card" id="roadmapContainer" style="display:none;">
+            <h3>🗺️ Your Tailored Skill Roadmap</h3>
+            <div class="markdown-body" id="roadmapMarkdown"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Modal for Final Interview Report -->
+    <div class="modal-overlay" id="reportModal" style="display:none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>📊 Final Interview Assessment</h2>
+          <button class="modal-close" id="btnCloseReportModal">&times;</button>
+        </div>
+        <div class="modal-body markdown-body" id="reportContent"></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnPrintReport">🖨️ Print / Save</button>
+          <button class="btn btn-primary" id="btnCloseReport">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+
